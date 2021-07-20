@@ -1,0 +1,168 @@
+<pre>
+    <script>
+        class XRegExp {
+            constructor(source, flag, root = "root") {
+                this.table = new Map();
+                this.regexp = new RegExp(this.compileRegExp(source, root, 0).source, flag)
+                console.log(this.regexp);
+                console.log(this.table);
+            }
+
+            exec(str) {
+                const r = this.regexp.exec(str);
+                for (let i = 1; i < r.length; i++) {
+                    if (r[i] !== void 0) {
+                        // console.log(this.table.get(i - 1), r[0]);
+                        r[this.table.get(i - 1)] = r[i];
+                    }
+                }
+
+                return r;
+            }
+
+            compileRegExp(source, name, start) {
+                if (source[name] instanceof RegExp) {
+                    return {
+                        source: source[name].source,
+                        length: 0
+                    };
+                }
+
+                let length = 0;
+
+                const regexp = source[name].replace(
+                    /\<([^>]+)\>/g,
+                    (str, $1) => {
+                        this.table.set(start + length, $1);
+                        this.table.set($1, start + length);
+
+                        ++length;
+
+                        const r = this.compileRegExp(source, $1, start + length);
+
+                        length += r.length;
+
+                        return "(" + r.source + ")";
+                    }
+                );
+                return {
+                    length: length,
+                    source: regexp
+                };
+            }
+
+            get lastIndex() {
+                return this.regexp.lastIndex;
+            }
+
+            set lastIndex(value) {
+                this.regexp.lastIndex = value;
+            }
+        }
+
+        function scan(str) {
+            const xregexp = {
+                InputElement: "<Whitespace>|<LineTerminator>|<Comments>|<Token>",
+                Whitespace: / /,
+                LineTerminator: /\n/,
+                Comments: /\/\*(?:[^*]|\*[^\/])\*\/|\/\/[^\n]*/,
+                Token: "<Literal>|<Keywords>|<Identifier>|<Punctuator>",
+                Literal: "<NumberLiteral>|<StringLiteral>|<BooleanLiteral>|<NullLiteral>",
+                NumberLiteral: /(?:[1-9][0-9]*|0)(?:.[0-9]*)?|\.[0-9]+/,
+                BooleanLiteral: /true|false/,
+                StringLiteral: /\"(?:[^"\n]|\\[\s\S])*\"|\'(?:[^"\n]|\\[\s\S])*\'/,
+                NullLiteral: /null/,
+                Keywords: /await|break|case|catch|class|const|continue|debugger|default|delete|do|else|export|extends|finally|for|function|if|import|in|instanceof|new|return|super|switch|this|throw|try|typeof|var|void|while|with|yield/,
+                Identifier: /[a-zA-Z_$][a-zA-Z0-9_$]*/,
+                Punctuator: /\{|\}|\(|\)|\[|\]|\.|(\.\.\.)|;|,|<|>|<=|>=|==|!=|===|!==|\+|-|\*|%|\*\*|\+\+|--|<<|>>|>>>|&|\||\^|!|~|&&|\|\||\?|:|=|\+=|-=|\*=|%=|\*\*=|<<=|>>=|>>>=|&=|\|=|\^=|=>/
+            };
+
+            const regexp = new XRegExp(xregexp, "g", "InputElement");
+            while (regexp.lastIndex < str.length) {
+                const r = regexp.exec(str);
+
+                if (r.Whitespace !== void 0 || r.LineTerminator !== void 0) {
+                    document.write(r[0]);
+                    continue;
+                }
+
+                let className;
+                if (r.Comments !== void 0) {
+                    className = "comments";
+                } else if (r.NumberLiteral !== void 0) {
+                    className = "number-literal";
+                } else if (r.BooleanLiteral !== void 0) {
+                    className = "boolean-literal";
+                } else if (r.NullLiteral !== void 0) {
+                    className = "null-literal";
+                } else if (r.StringLiteral !== void 0) {
+                    className = "string-literal";
+                } else if (r.Keywords !== void 0) {
+                    className = "keywords";
+                } else if (r.Identifier !== void 0) {
+                    className = "identifier";
+                } else {
+                    className = ""
+                }
+
+                //   console.log(r[0], color);
+
+                document.write(`<span class="${className}">${r[0]}</span>`);
+                if (!r[0].length) break;
+            }
+        }
+
+        scan(`
+      if (matched) {
+          const sp = specificity(rule.selectors[0]);
+          const _computedStyle = element.computedStyle;
+          const str = "1231231313123123";
+          const num = 300;
+          
+          // 注释 循环rule处理
+          for (let declaration of rule.declarations) {
+            if (!_computedStyle[declaration.property]) {
+              _computedStyle[declaration.property] = {};
+            }
+            if (
+              !_computedStyle[declaration.property].specificity ||
+              compare(_computedStyle[declaration.property].specificity, sp) < 0
+            ) {
+              _computedStyle[declaration.property].value = declaration.value;
+              _computedStyle[declaration.property].specificity = sp;
+            }
+          }
+        }
+      `);
+    </script>
+    <style>
+    body {
+        background-color: rgb(21, 21, 21);
+    }
+    
+    span {
+        color: #abb2bf;
+    }
+    
+     .comments {
+         color: #5c6370;
+     }
+    
+    .number-literal, .boolean-literal, .null-literal {
+        color: #d19a66;
+    }
+    
+    .string-literal {
+        color: #98c379;
+    }
+    
+    .keywords {
+        color: #c678dd;
+    }
+    
+    .identifier {
+        color: #e06c75;
+    }
+    
+    </style>
+    </pre>
