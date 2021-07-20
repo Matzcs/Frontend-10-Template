@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <!-- <pre></pre> -->
+    <style>
+        body {
+            background-color: rgb(21, 21, 21);
+        }
+
+        span {
+            color: #abb2bf;
+        }
+
+        .comments {
+            color: #5c6370;
+        }
+
+        .number-literal,
+        .boolean-literal,
+        .null-literal {
+            color: #d19a66;
+        }
+
+        .string-literal {
+            color: #98c379;
+        }
+
+        .keywords {
+            color: #c678dd;
+        }
+
+        .identifier {
+            color: #e06c75;
+        }
+    </style>
+</head>
+
+<body>
+    <textarea id="source" style="width: 100%; height: 400px;">
+      let x;
+      x = 1;
+      function a() {
+        log(x);
+      }
+      {
+        let x;
+        x = 100;
+        a();
+      }
+    </textarea>
+    <button id="run">run</button>
+</body>
+<script type="module" src="./run.js"></script>
+
+</html>
